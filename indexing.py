@@ -4,7 +4,7 @@ import sys
 import math
 
 import porter
-import func
+import cfc_tools
 
 class Index(dict):
     '''Index Description
@@ -88,8 +88,8 @@ class Index(dict):
     def query(self, querystring):
         '''
     '''
-        query_no_puct = func.replace_punctuation(querystring)
-        query_termlist = func.remove_multiple_space(query_no_puct).strip().split()
+        query_no_puct = cfc_tools.replace_punctuation(querystring)
+        query_termlist = cfc_tools.remove_multiple_space(query_no_puct).strip().split()
 
         acc = list()
         for term in query_termlist:
