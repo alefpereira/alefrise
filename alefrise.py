@@ -10,7 +10,7 @@ import cfc_tools
 def main():
     if len(sys.argv) != 3:
         print('alefrise 2016 - Alef Recumeração de informação [Search Engine]')
-        print('  Uso: python3 cfcdirectory queryfile')
+        print('  Uso: python3 %s cfcdirectory queryfile', sys.argv[0])
         print('cfcdirectory\t - CFC Database Directory')
         print('queryfile\t - Query file location')
         return 0
