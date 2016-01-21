@@ -23,96 +23,100 @@ def remove_multiple_space(text):
 '''
     return " "+" ".join(text.split())+" "
 
+def get_field(data, linestart):
+    #Read first line
+    nline = linestart
+    line = data[nline]
+    try:
+        field, content = line.split(' ', 1)
+    except ValueError:
+        raise ValueError('Not possible to extract the field from string: ', line, ' in line: ', nline+1, sep = '')
+    buff = content
+    nline+=1
+    line = data[nline]
+    stripedline = line.rstrip()
+    while(stripedline != '' and stripedline[0] == ' '):
+        buff += stripedline
+
+        nline+=1
+        line = data[nline]
+        stripedline = line.rstrip()
+
+    return buff, nline
+
+def search(fields, data, linestart):
+    nline = linestart
+    while (nline < len(data)):
+        line =  data[nline]
+        stripedline = line.rstrip()
+        if stripedline != '' and stripedline.split(' ', 1)[0] in fields:
+            break
+        nline += 1
+    return nline
+
 def read_docfile(fname):
-    """
-"""
-    with open(fname, 'r') as ftoindex:
+
+    with open(fname, 'r', encoding = 'ISO-8859-1') as ftoindex:
         data = ftoindex.readlines()
 
-        doc_dict = dict()
+    doc_dict = dict()
 
-        current_field = ''
-        nline = 0
-        while(nline < len(data)):
-            line = data[nline]
-            if line.strip():
+    nline = 0
+    while(nline < len(data)):
+        line = data[nline]
+        if line.strip():
+            try:
                 field, content = line.split(' ', 1)
+            except Exception:
+                print('File:', fname)
+                print('Content:', line)
+                raise
 
-                #Read Record Number
-                if(field == 'RN'):
-                    rn = int(content.strip())
 
-                    #Pass AN and Read Author(s)
-                    nline+=2
-                    line = data[nline]
-                    field, content = line.split(' ', 1)
-                    au = remove_multiple_space(replace_punctuation(content)).strip()
+            if field == 'RN':
+                try:
 
+                    #Read Record Number 'RN'
+                    rnstring, nline = get_field(data, nline)
+                    #print('RN', rnstring)
+                    #Read Author(s)
+                    nline = search(['AU'], data, nline)
+                    austring, nline = get_field(data, nline)
+                    #print('AU', austring)
                     #Read Title
-                    nline+=1
-                    buff = ''
-                    line = data[nline]
-                    field, content = line.split(' ', 1)
-                    while(field != 'SO'):
-                        buff += content
-
-                        nline+=1
-                        line = data[nline]
-                        field, content = line.split(' ', 1)
-
-                    ti = remove_multiple_space(replace_punctuation(buff)).strip()
-
-                    #Pass Source
-                    while field != 'MJ':
-                        nline+=1
-                        line = data[nline]
-                        field, content = line.split(' ', 1)
-
+                    nline = search(['TI'], data, nline)
+                    tistring, nline = get_field(data, nline)
+                    #print('TI', tistring)
                     #Read Major Subject
-                    buff = ''
-                    while(field != 'MN'):
-                        buff += content
-
-                        nline+=1
-                        line = data[nline]
-                        field, content = line.split(' ', 1)
-
-                    mn = remove_multiple_space(replace_punctuation(buff)).strip()
-
+                    nline = search('MJ', data, nline)
+                    mjstring, nline = get_field(data, nline)
+                    #print('MJ', mjstring)
                     #Read Minor Subject
-                    buff = ''
-                    while(field != 'AB'):
-                        buff += content
-
-                        nline+=1
-                        line = data[nline]
-                        field, content = line.split(' ', 1)
-
-                    mj = remove_multiple_space(replace_punctuation(buff)).strip()
-
+                    nline = search('MN', data, nline)
+                    mnstring, nline = get_field(data, nline)
+                    #print('MN', mnstring)
                     #Abstract Minor Subject
-                    buff = ''
-                    while(field != 'RF'):
-                        buff += content
+                    nline = search(['AB', 'EX'], data, nline)
+                    abstring, nline = get_field(data, nline)
+                    #print('AB:', abstring)
+                    nline = search('PN', data, nline)
+                    #nline =- 1
 
-                        nline+=1
-                        line = data[nline]
-                        field, content = line.split(' ', 1)
-
-                    ab = remove_multiple_space(replace_punctuation(buff)).strip()
+                    rn = int(rnstring.strip())
+                    au = remove_multiple_space(replace_punctuation(austring)).strip()
+                    ti = remove_multiple_space(replace_punctuation(tistring)).strip()
+                    mn = remove_multiple_space(replace_punctuation(mnstring)).strip()
+                    mj = remove_multiple_space(replace_punctuation(mjstring)).strip()
+                    ab = remove_multiple_space(replace_punctuation(abstring)).strip()
 
                     doc_string = " ".join([au, ti, mn, mj, ab]).lower()
                     termslist = doc_string.split()
                     apply_stem(termslist)
                     doc_dict[rn] = (rn, len(doc_string.split()), calc_doctf(termslist))
-
-            nline+=1
-
-    doctf_dict = dict()
-
-    for rn in doc_dict:
-        print(doc_dict[rn])
-
+                except Exception:
+                    print('fname', fname,'linha:(', nline,')', line)
+                    raise
+        nline += 1
     return doc_dict
 
 def read_queryfile(fname):

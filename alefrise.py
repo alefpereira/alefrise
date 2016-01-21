@@ -21,11 +21,13 @@ def main():
     cfclist, indexfile = list_cfcdir(cfcdirectory)
 
     if indexfile:
+        print('Index file', indexfile, 'found!')
         index = cfc_tools.load_index(cfcdirectory + os.sep + indexfile)
     else:
         #Load File
         index = CFCIndex()
         for cfcfile in cfclist:
+            print('Opening', cfcdirectory + os.sep + cfcfile)
             doc_dict = cfc_tools.read_docfile(cfcdirectory + os.sep + cfcfile)
             index.add_docstf(doc_dict)
         cfc_tools.save_index(index, cfcdirectory + os.sep + 'cfc.index')
