@@ -3,6 +3,8 @@ import string
 import collections
 import porter
 
+import pickle
+
 replace_dictionary = str.maketrans(string.punctuation+'\n', ' '*len(string.punctuation+'\n'))
 def replace_punctuation(text):
     """replace_punctuation(text, replace_dictionary):
@@ -131,7 +133,6 @@ def read_queryfile(fname):
                 #Read Record Number
                 if(field == 'QN'):
                     qn = int(content.strip())
-                    print(qn)
 
                     #Read Query String [QU]
                     nline+=1
@@ -201,3 +202,16 @@ def calc_doctf(doc_stringlist):
     '''
 '''
     return dict(collections.Counter(doc_stringlist))
+
+def save_index(cfcindex, findexname):
+    '''
+'''
+    with open(findexname, "wb") as index_file:
+        pickle.dump(cfcindex, index_file)
+
+def load_index(findexname):
+    '''
+'''
+    with open(findexname, "rb") as index_file:
+            cfcindex = pickle.load(index_file)
+    return cfcindex

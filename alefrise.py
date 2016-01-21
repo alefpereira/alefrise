@@ -16,23 +16,38 @@ def main():
         return 0
     cfcdirectory = sys.argv[1]
     queryfile = sys.argv[2]
-    #Se existe index
-        #load index
-    #Else
+
+
+    cfclist, indexfile = list_cfcdir(cfcdirectory)
+
+    if indexfile:
+        index = cfc_tools.load_index(cfcdirectory + os.sep + indexfile)
+    else:
         #Load File
-        #create index
-    #load_queries
-    #process queries
-    #doc_dict = cfc_tools.read_docfile('cfcexemplos/cfcexemplo3')
-    #cfc_tools.print_doc_dict(doc_dict)
+        index = CFCIndex()
+        for cfcfile in cfclist:
+            doc_dict = cfc_tools.read_docfile(cfcdirectory + os.sep + cfcfile)
+            index.add_docstf(doc_dict)
+        cfc_tools.save_index(index, cfcdirectory + os.sep + 'cfc.index')
 
     queries = cfc_tools.read_queryfile(queryfile)
 
-    #index = CFCIndex()
+    #TODO Avaliação
 
-    #index.add_docstf(doc_dict)
-    #print(index.avgdl)
-    #cfc_tools.print_idf(index)
+def list_cfcdir(cfcdirectory):
+    fulllist = os.listdir(cfcdirectory)
+    indexlist = [fname for fname in fulllist if fname.split('.')[-1] == 'index']
+    if len(indexlist) > 1:
+        raise Exception('More than one index file where found: $s', ', '.join(indexlist))
+    if indexlist:
+        indexfile = indexlist[0]
+    else:
+        indexfile = None
+
+    cfclist = [fname for fname in fulllist if len(fname.split('cf',1)) > 1 and fname.split('cf',1)[1].isnumeric()]
+    if len(cfclist) == 0:
+        raise Exception('No CFC doc file founds!')
+    return cfclist, indexfile,
 
 class CFCIndex (indexing.Index):
     '''
