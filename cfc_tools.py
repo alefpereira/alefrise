@@ -173,9 +173,12 @@ def read_queryfile(fname):
                         field, content = line.split(' ', 1)
 
                     rd_docstring = remove_multiple_space(replace_punctuation(buff))
-                    rd = docstring_split(rd_docstring, 2, returned = lambda docS: docS[0])
+                    rd = docstring_split(rd_docstring, 2, returned = lambda docS: int(docS[0]))
 
-                    queries.append((qn, qu, nr, rd,))
+                    termslist = qu.split()
+                    apply_stem(termslist)
+                    qu = ' '.join(termslist)
+                    queries.append((qn, qu.lower(), nr, rd,))
 
             #nline+=1
 

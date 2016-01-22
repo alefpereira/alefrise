@@ -53,37 +53,28 @@ class Index(dict):
                     self[term] = new_term
                 self[term].add_doctf(docid, doctfdict[term])
 
-            self.doc[docid] = doclen
+            self.doc[docid] = [0, 0.0]
 
-    def add_docstf(self, doctflist):
+    def add_docstf(self, doctflist, idfupdate = False):
         '''
     '''
         for doc in doctflist:
             self.add_doctfdict(*doctflist[doc])
 
-        doclensum = sum(self.doc.values())
-        self.avgdl = doclensum/len(self.doc)
-
-        self._update_idf()
+        if idfupdate:
+            self.update_idf()
 
     def increment_ndoc(self, ndoc):
         '''
     '''
         self.ndoc += ndoc
 
-    def _update_idf(self):
+    def update_idf(self):
         '''
     '''
         #TODO 
         for term in self:
-            
-            self[term].idf = math.log( (len(self.doc) - len(self[term].doclist) + 0.5) / (len(self[term].doclist) + 0.5) , 2)
-
-            for i, docterm in enumerate(self[term].doclist):
-                self[term].doclist[i].score = self.partial_score(self[term], docterm)
-
-            self[term].docdict = {doc.doc: (doc.doctf, doc.score) for doc in self[term].doclist}
-
+            self[term].idf = math.log2(len(self.doc)/len(self[term].doclist))
 
     def query(self, querystring):
         '''
@@ -108,7 +99,7 @@ class Term():
 '''
     def __init__(self, term):
         self.term = term
-        self.idf = 0
+        self.idf = 0.0
         self.doclist = list()
         self.docdict = dict()
 
@@ -143,7 +134,7 @@ class Doc (object):
     def __init__(self, doc):
         self.doc = doc
         self.doctf = 0
-        self.score = 0.0
+        self.weight = 0.0
 
     def __eq__(self, other):
         return other == self.doc
@@ -154,4 +145,4 @@ class Doc (object):
         self.doctf += doctf
 
     def __repr__(self):
-        return str(self.doc) + ": " + str(self.score)
+        return str(self.doc) + ": " + str(self.weight)
